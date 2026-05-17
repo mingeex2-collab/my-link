@@ -4,63 +4,56 @@ import { useState, useEffect } from "react"
 import { dummyLinks, type LinkItem } from "@/data/links"
 import { Card } from "@/components/ui/card"
 import { db } from "@/lib/firebase"
-import { collection, addDoc, getDocs, query, orderBy } from "firebase/firestore"
+import { collection, addDoc, getDocs, query, orderBy, onSnapshot } from "firebase/firestore"
 import { AddLinkDialog } from "@/components/AddLinkDialog"
 import { 
-  Code, 
-  Camera, 
-  Play, 
-  Link as LinkIcon, 
-  Briefcase, 
   ExternalLink,
   Share2,
   Sparkles,
   Heart,
-  Globe
 } from "lucide-react"
+import { FaGithub, FaInstagram, FaYoutube, FaBlog, FaBriefcase, FaGlobe } from "react-icons/fa"
 
 // 아이콘 매핑 함수
 const getIcon = (title: string) => {
-  if (title.includes("GitHub")) return <Code className="w-5 h-5" />;
-  if (title.includes("인스타그램")) return <Camera className="w-5 h-5" />;
-  if (title.includes("유튜브")) return <Play className="w-5 h-5" />;
-  if (title.includes("블로그")) return <LinkIcon className="w-5 h-5" />;
-  if (title.includes("포트폴리오")) return <Briefcase className="w-5 h-5" />;
-  return <Globe className="w-5 h-5" />;
+  const t = title.toLowerCase();
+  if (t.includes("github")) return <FaGithub className="w-6 h-6 text-[#181717] dark:text-white" />;
+  if (t.includes("인스타그램") || t.includes("instagram")) return <FaInstagram className="w-6 h-6 text-[#E4405F]" />;
+  if (t.includes("유튜브") || t.includes("youtube")) return <FaYoutube className="w-6 h-6 text-[#FF0000]" />;
+  if (t.includes("블로그") || t.includes("blog")) return <FaBlog className="w-5 h-5 text-[#00ABA9]" />;
+  if (t.includes("포트폴리오") || t.includes("portfolio")) return <FaBriefcase className="w-5 h-5 text-[#F25022]" />;
+  return <FaGlobe className="w-5 h-5 text-slate-400 dark:text-slate-300" />;
 };
 
 export default function Page() {
   const [links, setLinks] = useState<LinkItem[]>([])
 
   useEffect(() => {
-    const fetchLinks = async () => {
-      try {
-        const linksRef = collection(db, "users/anonymous/links");
-        const q = query(linksRef, orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(q);
-        
-        if (!snapshot.empty) {
-          const fetchedData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          })) as LinkItem[];
-          setLinks(fetchedData);
-        } else {
-          // Firestore가 비어있는 경우, 기존 dummyLinks(로컬 데이터)를 DB로 일괄 복사(마이그레이션)
-          const migratedLinks = [...dummyLinks];
-          for (let i = 0; i < dummyLinks.length; i++) {
-            const { id, ...dataToSave } = dummyLinks[i];
-            const docRef = await addDoc(collection(db, "users/anonymous/links"), dataToSave);
-            migratedLinks[i] = { ...migratedLinks[i], id: docRef.id };
+    const linksRef = collection(db, "users/anonymous/links");
+    const q = query(linksRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      if (!snapshot.empty) {
+        const fetchedData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as LinkItem[];
+        setLinks(fetchedData);
+      } else {
+        // Firestore가 비어있는 경우, 기존 dummyLinks(로컬 데이터)를 DB로 일괄 복사(마이그레이션)
+        const currentSnapshot = await getDocs(q);
+        if (currentSnapshot.empty) {
+          for (const item of dummyLinks) {
+            const { id, ...dataToSave } = item;
+            await addDoc(collection(db, "users/anonymous/links"), dataToSave);
           }
-          setLinks(migratedLinks);
         }
-      } catch (error) {
-        console.error("Failed to fetch links:", error);
       }
-    };
-    
-    fetchLinks();
+    }, (error) => {
+      console.error("Failed to listen to links:", error);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleAddLink = async (newLink: Omit<LinkItem, 'id' | 'createdAt'>) => {
@@ -69,13 +62,7 @@ export default function Page() {
         ...newLink,
         createdAt: new Date().toISOString(),
       };
-      const docRef = await addDoc(collection(db, "users/anonymous/links"), newDocObj);
-      
-      const link: LinkItem = {
-        id: docRef.id,
-        ...newDocObj,
-      };
-      setLinks((prev) => [link, ...prev]);
+      await addDoc(collection(db, "users/anonymous/links"), newDocObj);
     } catch (error) {
       console.error("Error adding document: ", error);
       alert("링크를 추가하는 중 오류가 발생했습니다.");
