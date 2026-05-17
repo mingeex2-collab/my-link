@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { dummyLinks, type LinkItem } from "@/data/links"
 import { Card } from "@/components/ui/card"
+import { db } from "@/lib/firebase"
+import { collection, addDoc, getDocs, query, orderBy } from "firebase/firestore"
 import { AddLinkDialog } from "@/components/AddLinkDialog"
 import { 
   Code, 
@@ -28,15 +30,56 @@ const getIcon = (title: string) => {
 };
 
 export default function Page() {
-  const [links, setLinks] = useState<LinkItem[]>(dummyLinks)
+  const [links, setLinks] = useState<LinkItem[]>([])
 
-  const handleAddLink = (newLink: Omit<LinkItem, 'id' | 'createdAt'>) => {
-    const link: LinkItem = {
-      ...newLink,
-      id: `link-${Date.now()}`,
-      createdAt: new Date().toISOString(),
+  useEffect(() => {
+    const fetchLinks = async () => {
+      try {
+        const linksRef = collection(db, "users/anonymous/links");
+        const q = query(linksRef, orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+          const fetchedData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as LinkItem[];
+          setLinks(fetchedData);
+        } else {
+          // Firestore가 비어있는 경우, 기존 dummyLinks(로컬 데이터)를 DB로 일괄 복사(마이그레이션)
+          const migratedLinks = [...dummyLinks];
+          for (let i = 0; i < dummyLinks.length; i++) {
+            const { id, ...dataToSave } = dummyLinks[i];
+            const docRef = await addDoc(collection(db, "users/anonymous/links"), dataToSave);
+            migratedLinks[i] = { ...migratedLinks[i], id: docRef.id };
+          }
+          setLinks(migratedLinks);
+        }
+      } catch (error) {
+        console.error("Failed to fetch links:", error);
+      }
+    };
+    
+    fetchLinks();
+  }, []);
+
+  const handleAddLink = async (newLink: Omit<LinkItem, 'id' | 'createdAt'>) => {
+    try {
+      const newDocObj = {
+        ...newLink,
+        createdAt: new Date().toISOString(),
+      };
+      const docRef = await addDoc(collection(db, "users/anonymous/links"), newDocObj);
+      
+      const link: LinkItem = {
+        id: docRef.id,
+        ...newDocObj,
+      };
+      setLinks((prev) => [link, ...prev]);
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("링크를 추가하는 중 오류가 발생했습니다.");
     }
-    setLinks((prev) => [link, ...prev])
   }
 
   return (
