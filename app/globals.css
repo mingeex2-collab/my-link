@@ -119,11 +119,31 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
-    @apply bg-background text-foreground;
-    }
+    @apply bg-background text-foreground antialiased selection:bg-indigo-100 selection:text-indigo-900;
+  }
   html {
-    @apply font-sans;
-    }
+    @apply font-sans scroll-smooth;
+  }
+}
+
+@layer utilities {
+  .bg-mesh {
+    background-color: #faf9f6; /* 연한 베이지/크림 단색 */
+  }
+
+  .dark .bg-mesh {
+    background-color: #121110;
+  }
+
+
+  .animate-float {
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
 }
