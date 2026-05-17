@@ -2,28 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { dummyLinks, type LinkItem } from "@/data/links"
-import { Card } from "@/components/ui/card"
 import { db } from "@/lib/firebase"
-import { collection, addDoc, getDocs, query, orderBy, onSnapshot } from "firebase/firestore"
+import { collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import { AddLinkDialog } from "@/components/AddLinkDialog"
+import { LinkCard } from "@/components/LinkCard"
 import { 
-  ExternalLink,
   Share2,
   Sparkles,
   Heart,
 } from "lucide-react"
-import { FaGithub, FaInstagram, FaYoutube, FaBlog, FaBriefcase, FaGlobe } from "react-icons/fa"
-
-// 아이콘 매핑 함수
-const getIcon = (title: string) => {
-  const t = title.toLowerCase();
-  if (t.includes("github")) return <FaGithub className="w-6 h-6 text-[#181717] dark:text-white" />;
-  if (t.includes("인스타그램") || t.includes("instagram")) return <FaInstagram className="w-6 h-6 text-[#E4405F]" />;
-  if (t.includes("유튜브") || t.includes("youtube")) return <FaYoutube className="w-6 h-6 text-[#FF0000]" />;
-  if (t.includes("블로그") || t.includes("blog")) return <FaBlog className="w-5 h-5 text-[#00ABA9]" />;
-  if (t.includes("포트폴리오") || t.includes("portfolio")) return <FaBriefcase className="w-5 h-5 text-[#F25022]" />;
-  return <FaGlobe className="w-5 h-5 text-slate-400 dark:text-slate-300" />;
-};
 
 export default function Page() {
   const [links, setLinks] = useState<LinkItem[]>([])
@@ -58,6 +45,7 @@ export default function Page() {
 
   const handleAddLink = async (newLink: Omit<LinkItem, 'id' | 'createdAt'>) => {
     try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
       const newDocObj = {
         ...newLink,
         createdAt: new Date().toISOString(),
@@ -66,6 +54,28 @@ export default function Page() {
     } catch (error) {
       console.error("Error adding document: ", error);
       alert("링크를 추가하는 중 오류가 발생했습니다.");
+    }
+  }
+
+  const handleUpdateLink = async (id: string, updatedData: { title: string; url: string }) => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      const linkRef = doc(db, "users/anonymous/links", id);
+      await updateDoc(linkRef, updatedData);
+    } catch (error) {
+      console.error("Error updating document: ", error);
+      alert("링크를 수정하는 중 오류가 발생했습니다.");
+    }
+  }
+
+  const handleDeleteLink = async (id: string) => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      const linkRef = doc(db, "users/anonymous/links", id);
+      await deleteDoc(linkRef);
+    } catch (error) {
+      console.error("Error deleting document: ", error);
+      alert("링크를 삭제하는 중 오류가 발생했습니다.");
     }
   }
 
@@ -110,31 +120,12 @@ export default function Page() {
           <AddLinkDialog onAdd={handleAddLink} />
           
           {links.map((link) => (
-            <a
+            <LinkCard 
               key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block group"
-            >
-              <Card className="relative overflow-hidden bg-white dark:bg-slate-900 border-none transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none hover:-translate-y-1 rounded-[2.5rem]">
-                <div className="p-5 flex items-center justify-between w-full">
-                  <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-300 shadow-inner group-hover:scale-110 transition-transform duration-300 border border-slate-100 dark:border-slate-700">
-                      {getIcon(link.title)}
-                    </div>
-                    
-                    <span className="font-bold text-lg text-slate-700 dark:text-slate-200 transition-colors duration-300 group-hover:text-slate-900 dark:group-hover:text-white">
-                      {link.title}
-                    </span>
-                  </div>
-
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-slate-300 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:bg-slate-100 dark:group-hover:bg-slate-800 transition-all duration-300">
-                    <ExternalLink className="w-4 h-4" />
-                  </div>
-                </div>
-              </Card>
-            </a>
+              link={link}
+              onUpdate={handleUpdateLink}
+              onDelete={handleDeleteLink}
+            />
           ))}
         </div>
 

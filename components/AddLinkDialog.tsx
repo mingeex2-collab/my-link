@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 
 // Zod 스키마 정의
 const linkSchema = z.object({
@@ -34,7 +34,7 @@ const linkSchema = z.object({
 type LinkFormValues = z.infer<typeof linkSchema>
 
 interface AddLinkDialogProps {
-  onAdd: (link: { title: string; url: string }) => void
+  onAdd: (link: { title: string; url: string }) => Promise<void> | void
 }
 
 export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
@@ -53,10 +53,17 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
     },
   })
 
-  const onSubmit = (data: LinkFormValues) => {
-    onAdd(data)
-    reset()
-    setOpen(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const onSubmit = async (data: LinkFormValues) => {
+    setIsSaving(true)
+    try {
+      await onAdd(data)
+      reset()
+      setOpen(false)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -125,8 +132,10 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
           <DialogFooter className="mt-4">
             <Button 
               type="submit" 
-              className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              disabled={isSaving}
             >
+              {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
               링크 저장하기
             </Button>
           </DialogFooter>
