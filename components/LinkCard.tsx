@@ -17,7 +17,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { FaGithub, FaInstagram, FaYoutube, FaBlog, FaBriefcase, FaGlobe } from "react-icons/fa"
+import { 
+  FaGithub, 
+  FaInstagram, 
+  FaYoutube, 
+  FaBlog, 
+  FaBriefcase, 
+  FaGlobe, 
+  FaGoogle, 
+  FaFacebook, 
+  FaLinkedin, 
+  FaTwitter, 
+  FaDiscord,
+  FaTiktok,
+  FaTwitch
+} from "react-icons/fa"
 
 const linkSchema = z.object({
   title: z
@@ -34,13 +48,35 @@ const linkSchema = z.object({
 
 type LinkFormValues = z.infer<typeof linkSchema>
 
-const getIcon = (title: string) => {
+const getIcon = (title: string, url?: string) => {
   const t = title.toLowerCase();
+  const u = url?.toLowerCase() || "";
+  
+  // URL 기반 감지 (가장 정확함)
+  if (u.includes("github.com")) return <FaGithub className="w-6 h-6 text-[#181717] dark:text-white" />;
+  if (u.includes("instagram.com")) return <FaInstagram className="w-6 h-6 text-[#E4405F]" />;
+  if (u.includes("youtube.com") || u.includes("youtu.be")) return <FaYoutube className="w-6 h-6 text-[#FF0000]" />;
+  if (u.includes("google.com")) return <FaGoogle className="w-5 h-5 text-[#4285F4]" />;
+  if (u.includes("facebook.com")) return <FaFacebook className="w-6 h-6 text-[#1877F2]" />;
+  if (u.includes("linkedin.com")) return <FaLinkedin className="w-6 h-6 text-[#0A66C2]" />;
+  if (u.includes("twitter.com") || u.includes("x.com")) return <FaTwitter className="w-5 h-5 text-[#1DA1F2] dark:text-white" />;
+  if (u.includes("discord.com") || u.includes("discord.gg")) return <FaDiscord className="w-5 h-5 text-[#5865F2]" />;
+  if (u.includes("tiktok.com")) return <FaTiktok className="w-5 h-5 text-[#000000] dark:text-white" />;
+  if (u.includes("twitch.tv")) return <FaTwitch className="w-5 h-5 text-[#9146FF]" />;
+  if (u.includes("blog.naver.com") || u.includes("tistory.com")) return <FaBlog className="w-5 h-5 text-[#00ABA9]" />;
+
+  // 제목 기반 감지 (URL에서 못 찾았을 경우)
   if (t.includes("github")) return <FaGithub className="w-6 h-6 text-[#181717] dark:text-white" />;
   if (t.includes("인스타그램") || t.includes("instagram")) return <FaInstagram className="w-6 h-6 text-[#E4405F]" />;
   if (t.includes("유튜브") || t.includes("youtube")) return <FaYoutube className="w-6 h-6 text-[#FF0000]" />;
+  if (t.includes("구글") || t.includes("google")) return <FaGoogle className="w-5 h-5 text-[#4285F4]" />;
+  if (t.includes("페이스북") || t.includes("facebook")) return <FaFacebook className="w-6 h-6 text-[#1877F2]" />;
+  if (t.includes("링크드인") || t.includes("linkedin")) return <FaLinkedin className="w-6 h-6 text-[#0A66C2]" />;
+  if (t.includes("트위터") || t.includes("twitter") || t === "x") return <FaTwitter className="w-5 h-5 text-[#1DA1F2] dark:text-white" />;
+  if (t.includes("디스코드") || t.includes("discord")) return <FaDiscord className="w-5 h-5 text-[#5865F2]" />;
   if (t.includes("블로그") || t.includes("blog")) return <FaBlog className="w-5 h-5 text-[#00ABA9]" />;
   if (t.includes("포트폴리오") || t.includes("portfolio")) return <FaBriefcase className="w-5 h-5 text-[#F25022]" />;
+  
   return <FaGlobe className="w-5 h-5 text-slate-400 dark:text-slate-300" />;
 };
 
@@ -97,36 +133,36 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
 
   if (isEditing) {
     return (
-      <Card className="p-5 relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem]">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <Card className="p-6 relative overflow-hidden bg-card border border-border rounded-2xl shadow-soft">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
           <div className="grid gap-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
               링크 제목
             </label>
             <Input
               placeholder="예: 내 개인 블로그"
               {...register("title")}
               aria-invalid={!!errors.title}
-              className="rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary transition-all h-10"
+              className="rounded-xl border-border focus:ring-1 focus:ring-primary h-12 text-base font-medium"
             />
             {errors.title && (
-              <p className="text-xs font-medium text-destructive ml-1">
+              <p className="text-xs font-bold text-destructive ml-1">
                 {errors.title.message}
               </p>
             )}
           </div>
           <div className="grid gap-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
               URL 주소
             </label>
             <Input
               placeholder="https://example.com"
               {...register("url")}
               aria-invalid={!!errors.url}
-              className="rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary transition-all h-10"
+              className="rounded-xl border-border focus:ring-1 focus:ring-primary h-12 text-base font-medium"
             />
             {errors.url && (
-              <p className="text-xs font-medium text-destructive ml-1">
+              <p className="text-xs font-bold text-destructive ml-1">
                 {errors.url.message}
               </p>
             )}
@@ -134,19 +170,19 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
           <div className="flex gap-2 justify-end mt-2">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={handleCancelEdit}
-              className="rounded-xl font-bold"
+              className="rounded-xl font-bold px-6"
             >
               취소
             </Button>
             <Button
               type="submit"
-              className="rounded-xl font-bold flex items-center"
+              className="rounded-xl font-bold px-8 flex items-center"
               disabled={isSaving}
             >
               {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              저장
+              저장하기
             </Button>
           </div>
         </form>
@@ -157,7 +193,7 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
   return (
     <>
       <div className="group block relative">
-        <Card className="relative overflow-hidden bg-white dark:bg-slate-900 border-none transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none hover:-translate-y-1 rounded-[2.5rem]">
+        <Card className="relative overflow-hidden bg-card border border-border/60 transition-all duration-300 hover:border-primary/30 hover:shadow-soft rounded-2xl">
           <div className="p-5 flex items-center justify-between w-full">
             <a
               href={link.url}
@@ -165,37 +201,39 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-5 flex-1 w-full"
             >
-              <div className="w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-300 shadow-inner group-hover:scale-110 transition-transform duration-300 border border-slate-100 dark:border-slate-700">
-                {getIcon(link.title)}
+              <div className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center bg-muted text-foreground border border-border/40 group-hover:scale-105 transition-transform duration-500">
+                {getIcon(link.title, link.url)}
               </div>
               
-              <span className="font-bold text-lg truncate text-slate-700 dark:text-slate-200 transition-colors duration-300 group-hover:text-slate-900 dark:group-hover:text-white">
-                {link.title}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-xl tracking-tight text-foreground truncate transition-colors duration-300 group-hover:text-primary">
+                  {link.title}
+                </span>
+              </div>
             </a>
 
             <div className="flex items-center gap-2 ml-4 relative z-10 shrink-0">
               <button
                 onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-300"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-300"
                 title="수정"
               >
-                <Edit2 className="w-4 h-4" />
+                <Edit2 className="w-4.5 h-4.5" />
               </button>
               <button
                 onClick={(e) => { e.preventDefault(); setIsDeleteDialogOpen(true); }}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-300"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-300"
                 title="삭제"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4.5 h-4.5" />
               </button>
               <a
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-300 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 ml-1"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-300 ml-1"
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-4.5 h-4.5" />
               </a>
             </div>
           </div>

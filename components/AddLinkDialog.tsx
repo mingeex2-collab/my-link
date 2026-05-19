@@ -77,26 +77,28 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
       <DialogTrigger
         render={
           <Button 
-            variant="outline" 
-            className="w-full flex items-center gap-2 py-6 rounded-[2rem] border-dashed border-2 bg-white/50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-900 transition-all duration-300 group"
+            variant="ghost" 
+            className="w-full h-20 flex items-center gap-4 px-6 rounded-[2rem] border-2 border-dashed border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300 group"
           >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-              <Plus className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-background text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
+              <Plus className="w-6 h-6" />
             </div>
-            <span className="font-bold text-slate-500 dark:text-slate-400">새로운 링크 추가하기</span>
+            <div className="flex flex-col items-start">
+              <span className="font-bold text-primary text-sm uppercase tracking-widest">새로운 링크 추가하기</span>
+            </div>
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-[425px] rounded-[2rem] border-none shadow-2xl overflow-hidden mt-4">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">링크 추가</DialogTitle>
-          <DialogDescription>
-            프로필에 표시될 새로운 링크의 제목과 URL을 입력해 주세요.
+      <DialogContent className="sm:max-w-[450px] rounded-[2rem] border border-border shadow-soft overflow-hidden">
+        <DialogHeader className="py-2">
+          <DialogTitle className="text-3xl font-bold tracking-tight text-foreground">새로운 링크 추가하기</DialogTitle>
+          <DialogDescription className="text-sm font-medium text-muted-foreground">
+            나만의 고유한 링크를 추가하세요.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
-          <div className="grid gap-2">
-            <label htmlFor="title" className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-8 py-6">
+          <div className="grid gap-3">
+            <label htmlFor="title" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
               링크 제목
             </label>
             <Input
@@ -104,16 +106,16 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
               placeholder="예: 내 개인 블로그"
               {...register("title")}
               aria-invalid={!!errors.title}
-              className="rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary transition-all h-12"
+              className="rounded-xl border-border focus:ring-1 focus:ring-primary h-14 text-base font-medium"
             />
             {errors.title && (
-              <p className="text-xs font-medium text-destructive ml-1">
+              <p className="text-xs font-bold text-destructive ml-1">
                 {errors.title.message}
               </p>
             )}
           </div>
-          <div className="grid gap-2">
-            <label htmlFor="url" className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+          <div className="grid gap-3">
+            <label htmlFor="url" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
               URL 주소
             </label>
             <Input
@@ -121,21 +123,21 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
               placeholder="https://example.com"
               {...register("url")}
               aria-invalid={!!errors.url}
-              className="rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary transition-all h-12"
+              className="rounded-xl border-border focus:ring-1 focus:ring-primary h-14 text-base font-medium"
             />
             {errors.url && (
-              <p className="text-xs font-medium text-destructive ml-1">
+              <p className="text-xs font-bold text-destructive ml-1">
                 {errors.url.message}
               </p>
             )}
           </div>
-          <DialogFooter className="mt-4">
+          <DialogFooter className="mt-4 pt-4 border-t border-border/40">
             <Button 
               type="submit" 
-              className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full h-16 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 shadow-soft"
               disabled={isSaving}
             >
-              {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isSaving && <Loader2 className="w-5 h-5 animate-spin" />}
               링크 저장하기
             </Button>
           </DialogFooter>
