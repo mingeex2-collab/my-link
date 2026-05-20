@@ -1,0 +1,128 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ──────────────────────────────────────────────────────────────
+    // Helper Functions
+    // ──────────────────────────────────────────────────────────────
+
+    // 로그인 여부 확인
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // 요청자가 해당 uid의 본인인지 확인
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // 링크 문서 필드 유효성 검사
+    function isValidLink() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['title', 'url', 'createdAt'])
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 200
+        && data.url is string
+        && data.url.size() > 0
+        && data.url.size() <= 2048
+        && data.createdAt is string;
+    }
+
+    // 프로필 문서 필드 유효성 검사
+    function isValidProfile() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['displayName', 'username', 'bio', 'photoURL'])
+        && data.displayName is string
+        && data.displayName.size() > 0
+        && data.displayName.size() <= 100
+        && data.username is string
+        && data.username.size() >= 3
+        && data.username.size() <= 30
+        && data.bio is string
+        && data.bio.size() <= 500
+        && data.photoURL is string;
+    }
+
+    // username은 영소문자·숫자·하이픈·언더스코어만 허용 (정규식 미지원 → 길이만 체크)
+    // 실제 포맷 검사는 클라이언트에서 추가로 수행
+    function isValidUsername(username) {
+      return username.size() >= 3 && username.size() <= 30;
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // /users/{userId}  (사용자 루트 문서 — 현재 미사용이나 확장 대비)
+    // ──────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      // 루트 문서는 읽기만 허용 (공개 프로필 조회용)
+      allow read: if true;
+      // 루트 문서 쓰기는 본인만 (미래 확장 대비)
+      allow write: if isOwner(userId);
+
+      // ──────────────────────────────────────────────────────────
+      // /users/{userId}/links/{linkId}
+      // ──────────────────────────────────────────────────────────
+      match /links/{linkId} {
+        // 읽기: 누구나 (공개 프로필 페이지에서 링크 목록 조회)
+        allow read: if true;
+
+        // 생성: 로그인 + 본인 + 유효한 링크 데이터
+        allow create: if isOwner(userId) && isValidLink();
+
+        // 수정: 로그인 + 본인 + 유효한 링크 데이터
+        //        createdAt은 변경 불가 (원본값 유지 강제)
+        allow update: if isOwner(userId)
+          && isValidLink()
+          && request.resource.data.createdAt == resource.data.createdAt;
+
+        // 삭제: 로그인 + 본인
+        allow delete: if isOwner(userId);
+      }
+
+      // ──────────────────────────────────────────────────────────
+      // /users/{userId}/profile/{profileId}
+      //   현재 코드에서는 항상 profileId == "main" 으로 고정
+      // ──────────────────────────────────────────────────────────
+      match /profile/{profileId} {
+        // 읽기: 누구나 (공개 프로필 표시)
+        allow read: if true;
+
+        // 생성/수정: 로그인 + 본인 + 유효한 프로필 데이터
+        //            profileId는 "main"으로만 제한
+        allow create, update: if isOwner(userId)
+          && profileId == "main"
+          && isValidProfile();
+
+        // 삭제: 허용하지 않음 (프로필은 삭제 불가, update로 초기화)
+        allow delete: if false;
+      }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // /usernames/{username}
+    //   username → uid 매핑 테이블
+    //   saveProfile() 트랜잭션에서 set/delete 로 관리됨
+    // ──────────────────────────────────────────────────────────────
+    match /usernames/{username} {
+      // 읽기: 누구나 (username 중복 확인, 프로필 페이지 조회)
+      allow read: if true;
+
+      // 생성: 로그인한 사용자만
+      //        저장되는 uid가 요청자 본인의 uid인지 확인
+      //        username 길이 유효성 검사
+      allow create: if isSignedIn()
+        && isValidUsername(username)
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid;
+
+      // 수정: 허용하지 않음 (트랜잭션으로 delete → create 패턴 사용)
+      allow update: if false;
+
+      // 삭제: 로그인 + 해당 username에 저장된 uid가 본인인지 확인
+      allow delete: if isSignedIn()
+        && resource.data.uid == request.auth.uid;
+    }
+
+  }
+}
