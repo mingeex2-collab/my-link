@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/Header"
 import { ToastProvider } from "@/lib/toast-context";
 import { CustomToaster } from "@/components/ui/custom-toaster";
+import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 
 const noto = Noto_Sans_KR({
@@ -35,11 +36,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ToastProvider>
+          <Providers>
             <Header />
-            <CustomToaster />
             {children}
-          </ToastProvider>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Loader2 } from "lucide-react"
+import { Plus } from "lucide-react"
+import { useAddLink } from "@/hooks/useLinks"
 
 // Zod 스키마 정의
 const linkSchema = z.object({
@@ -34,11 +35,12 @@ const linkSchema = z.object({
 type LinkFormValues = z.infer<typeof linkSchema>
 
 interface AddLinkDialogProps {
-  onAdd: (link: { title: string; url: string }) => Promise<void> | void
+  uid: string
 }
 
-export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
+export function AddLinkDialog({ uid }: AddLinkDialogProps) {
   const [open, setOpen] = useState(false)
+  const addLink = useAddLink(uid)
 
   const {
     register,
@@ -53,22 +55,19 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
     },
   })
 
-  const [isSaving, setIsSaving] = useState(false)
-
   const onSubmit = async (data: LinkFormValues) => {
-    setIsSaving(true)
     try {
-      await onAdd(data)
+      await addLink.mutateAsync(data)
       reset()
       setOpen(false)
-    } finally {
-      setIsSaving(false)
+    } catch {
+      // silent fail
     }
   }
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onOpenChange={(val) => {
         setOpen(val)
         if (!val) reset()
@@ -76,8 +75,8 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
     >
       <DialogTrigger
         render={
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="w-full h-20 flex items-center gap-4 px-6 rounded-[2rem] border-2 border-dashed border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300 group"
           >
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-background text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
@@ -132,12 +131,11 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
             )}
           </div>
           <DialogFooter className="mt-4 pt-4 border-t border-border/40">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-16 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 shadow-soft"
-              disabled={isSaving}
+              disabled={addLink.isPending}
             >
-              {isSaving && <Loader2 className="w-5 h-5 animate-spin" />}
               링크 저장하기
             </Button>
           </DialogFooter>

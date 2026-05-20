@@ -7,7 +7,7 @@ import * as z from "zod"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ExternalLink, Edit2, Trash2, Loader2 } from "lucide-react"
+import { Edit2, Trash2 } from "lucide-react"
 import type { LinkItem } from "@/data/links"
 import {
   Dialog,
@@ -17,21 +17,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { 
-  FaGithub, 
-  FaInstagram, 
-  FaYoutube, 
-  FaBlog, 
-  FaBriefcase, 
-  FaGlobe, 
-  FaGoogle, 
-  FaFacebook, 
-  FaLinkedin, 
-  FaTwitter, 
+import {
+  FaGithub,
+  FaInstagram,
+  FaYoutube,
+  FaBlog,
+  FaBriefcase,
+  FaGlobe,
+  FaGoogle,
+  FaFacebook,
+  FaLinkedin,
+  FaTwitter,
   FaDiscord,
   FaTiktok,
   FaTwitch
 } from "react-icons/fa"
+import { useUpdateLink, useDeleteLink } from "@/hooks/useLinks"
 
 const linkSchema = z.object({
   title: z
@@ -51,7 +52,7 @@ type LinkFormValues = z.infer<typeof linkSchema>
 const getIcon = (title: string, url?: string) => {
   const t = title.toLowerCase();
   const u = url?.toLowerCase() || "";
-  
+
   // URL 기반 감지 (가장 정확함)
   if (u.includes("github.com")) return <FaGithub className="w-6 h-6 text-[#181717] dark:text-white" />;
   if (u.includes("instagram.com")) return <FaInstagram className="w-6 h-6 text-[#E4405F]" />;
@@ -76,20 +77,22 @@ const getIcon = (title: string, url?: string) => {
   if (t.includes("디스코드") || t.includes("discord")) return <FaDiscord className="w-5 h-5 text-[#5865F2]" />;
   if (t.includes("블로그") || t.includes("blog")) return <FaBlog className="w-5 h-5 text-[#00ABA9]" />;
   if (t.includes("포트폴리오") || t.includes("portfolio")) return <FaBriefcase className="w-5 h-5 text-[#F25022]" />;
-  
+
   return <FaGlobe className="w-5 h-5 text-slate-400 dark:text-slate-300" />;
 };
 
 interface LinkCardProps {
   link: LinkItem;
-  onUpdate: (id: string, data: { title: string; url: string }) => Promise<void> | void;
-  onDelete: (id: string) => Promise<void> | void;
+  uid: string;
+  readOnly?: boolean;
 }
 
-export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
+export function LinkCard({ link, uid, readOnly = false }: LinkCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+
+  const updateLink = useUpdateLink(uid)
+  const deleteLink = useDeleteLink(uid)
 
   const {
     register,
@@ -105,12 +108,11 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
   })
 
   const onSubmit = async (data: LinkFormValues) => {
-    setIsSaving(true)
     try {
-      await onUpdate(link.id, data)
+      await updateLink.mutateAsync({ id: link.id, data })
       setIsEditing(false)
-    } finally {
-      setIsSaving(false)
+    } catch {
+      // silent fail
     }
   }
 
@@ -119,15 +121,12 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
     setIsEditing(false)
   }
 
-  const [isDeleting, setIsDeleting] = useState(false)
-
   const handleDeleteConfirm = async () => {
-    setIsDeleting(true)
     try {
-      await onDelete(link.id)
+      await deleteLink.mutateAsync(link.id)
       setIsDeleteDialogOpen(false)
-    } finally {
-      setIsDeleting(false)
+    } catch {
+      // silent fail
     }
   }
 
@@ -179,9 +178,8 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
             <Button
               type="submit"
               className="rounded-xl font-bold px-8 flex items-center"
-              disabled={isSaving}
+              disabled={updateLink.isPending}
             >
-              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               저장하기
             </Button>
           </div>
@@ -204,7 +202,7 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
               <div className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center bg-muted text-foreground border border-border/40 group-hover:scale-105 transition-transform duration-500">
                 {getIcon(link.title, link.url)}
               </div>
-              
+
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-xl tracking-tight text-foreground truncate transition-colors duration-300 group-hover:text-primary">
                   {link.title}
@@ -213,28 +211,25 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
             </a>
 
             <div className="flex items-center gap-2 ml-4 relative z-10 shrink-0">
-              <button
-                onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-300"
-                title="수정"
-              >
-                <Edit2 className="w-4.5 h-4.5" />
-              </button>
-              <button
-                onClick={(e) => { e.preventDefault(); setIsDeleteDialogOpen(true); }}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-300"
-                title="삭제"
-              >
-                <Trash2 className="w-4.5 h-4.5" />
-              </button>
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-300 ml-1"
-              >
-                <ExternalLink className="w-4.5 h-4.5" />
-              </a>
+              {!readOnly && (
+                <>
+                  <button
+                    onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-300"
+                    title="수정"
+                  >
+                    <Edit2 className="w-4.5 h-4.5" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.preventDefault(); setIsDeleteDialogOpen(true); }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-300"
+                    title="삭제"
+                  >
+                    <Trash2 className="w-4.5 h-4.5" />
+                  </button>
+                </>
+              )}
+              
             </div>
           </div>
         </Card>
@@ -261,10 +256,9 @@ export function LinkCard({ link, onUpdate, onDelete }: LinkCardProps) {
             <Button
               variant="destructive"
               onClick={handleDeleteConfirm}
-              disabled={isDeleting}
+              disabled={deleteLink.isPending}
               className="rounded-xl font-bold flex-1 sm:flex-none flex items-center justify-center gap-2"
             >
-              {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
               삭제하기
             </Button>
           </DialogFooter>

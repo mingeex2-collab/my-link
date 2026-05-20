@@ -1,121 +1,130 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { dummyLinks, type LinkItem } from "@/data/links"
+import { dummyLinks } from "@/data/links"
 import { db } from "@/lib/firebase"
-import { collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore"
-import { useToast } from "@/lib/toast-context"
+import { collection, addDoc, getDocs, query, orderBy, doc, getDoc } from "firebase/firestore"
 import { AddLinkDialog } from "@/components/AddLinkDialog"
 import { LinkCard } from "@/components/LinkCard"
-import { 
+import { cn } from "@/lib/utils"
+import {
   Share2,
   Sparkles,
-  Heart,
   Lock,
   ArrowRight,
+  Edit3,
+  Check,
+  X,
 } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useLinks } from "@/hooks/useLinks"
+import { useProfile, useSaveProfile } from "@/hooks/useProfile"
+import { useEffect, useRef, useState } from "react"
+
+type EditableField = "username" | "bio"
 
 export default function ProfilePage() {
   const { user, loading: authLoading, loginWithGoogle } = useAuth()
-  const { showToast } = useToast()
-  const [links, setLinks] = useState<LinkItem[]>([])
-  const [isInitialLoad, setIsInitialLoad] = useState(true)
 
+  // ────────────────────────────────────────────
+  // TanStack Query 훅
+  // ────────────────────────────────────────────
+  const { data: links = [] } = useLinks(user?.uid ?? null)
+  const { data: profile } = useProfile(user?.uid ?? null, user ?? null)
+  const saveProfileMutation = useSaveProfile(user?.uid ?? null)
+
+  // ────────────────────────────────────────────
+  // 초기 더미 데이터 마이그레이션 (최초 1회)
+  // ────────────────────────────────────────────
+  const migrated = useRef(false)
   useEffect(() => {
-    if (!user) {
-      setLinks([])
-      return
-    }
-
-    const linksRef = collection(db, `users/${user.uid}/links`);
-    const q = query(linksRef, orderBy("createdAt", "desc"));
-
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const fetchedData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as LinkItem[];
-      
-      setLinks(fetchedData);
-
-      // Firestore가 완전히 비어있고, 앱이 처음 로드되는 상황에서만 마이그레이션 수행
-      if (snapshot.empty && isInitialLoad && user.uid) {
-        setIsInitialLoad(false); 
-        const currentSnapshot = await getDocs(q);
-        if (currentSnapshot.empty) {
-          for (const item of dummyLinks) {
-            const { id, ...dataToSave } = item;
-            await addDoc(collection(db, `users/${user.uid}/links`), {
-              ...dataToSave,
-              createdAt: new Date().toISOString()
-            });
-          }
+    if (!user || migrated.current) return
+    migrated.current = true;
+    (async () => {
+      const linksRef = collection(db, `users/${user.uid}/links`)
+      const q = query(linksRef, orderBy("createdAt", "desc"))
+      const snapshot = await getDocs(q)
+      if (snapshot.empty) {
+        for (const item of dummyLinks) {
+          const { id, ...dataToSave } = item
+          await addDoc(linksRef, { ...dataToSave, createdAt: new Date().toISOString() })
         }
       }
-    }, (error) => {
-      console.error("Failed to listen to links:", error);
-    });
+    })()
+  }, [user])
 
-    return () => unsubscribe();
-  }, [user, isInitialLoad]);
+  // ────────────────────────────────────────────
+  // 인라인 편집 상태
+  // ────────────────────────────────────────────
+  const [editingField, setEditingField] = useState<EditableField | null>(null)
+  const [editValue, setEditValue] = useState("")
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false)
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "available" | "taken">("idle")
 
-  const handleAddLink = async (newLink: Omit<LinkItem, 'id' | 'createdAt'>) => {
-    if (!user) return;
+  const handleStartEdit = (field: EditableField, currentVal: string) => {
+    setEditingField(field)
+    setEditValue(currentVal)
+    if (field === "username") setUsernameStatus("available")
+    else setUsernameStatus("idle")
+  }
+
+  const handleCancelEdit = () => {
+    setEditingField(null)
+    setEditValue("")
+    setUsernameStatus("idle")
+  }
+
+  const handleUsernameCheck = async (val: string) => {
+    if (!val || val.length < 3) { setUsernameStatus("idle"); return }
+    if (profile && val === profile.username) { setUsernameStatus("available"); return }
+    setIsCheckingUsername(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const newDocObj = {
-        ...newLink,
-        createdAt: new Date().toISOString(),
-      };
-      await addDoc(collection(db, `users/${user.uid}/links`), newDocObj);
-    } catch (error) {
-      console.error("Error adding link:", error);
-      showToast("링크 추가 중 오류가 발생했습니다.", "error");
+      const docSnap = await getDoc(doc(db, "usernames", val.toLowerCase()))
+      setUsernameStatus(docSnap.exists() ? "taken" : "available")
+    } catch {
+      /* ignore */
+    } finally {
+      setIsCheckingUsername(false)
     }
   }
 
-  const handleUpdateLink = async (id: string, updatedData: { title: string; url: string }) => {
-    if (!user) return;
+  const handleSaveProfile = async () => {
+    if (!user || !profile || !editingField) return
+    if (editingField === "username" && usernameStatus !== "available" && editValue !== profile.username) return
+    if (!editValue.trim() && editingField !== "bio") return
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const linkRef = doc(db, `users/${user.uid}/links`, id);
-      await updateDoc(linkRef, updatedData);
-    } catch (error) {
-      console.error("Error updating link:", error);
-      showToast("링크 수정 중 오류가 발생했습니다.", "error");
+      await saveProfileMutation.mutateAsync({
+        uid: user.uid,
+        field: editingField,
+        value: editValue,
+        currentProfile: profile,
+      })
+      setEditingField(null)
+    } catch {
+      // 낙관적 업데이트가 자동으로 롤백함
     }
   }
 
-  const handleDeleteLink = async (id: string) => {
-    if (!user) return;
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const linkRef = doc(db, `users/${user.uid}/links`, id);
-      await deleteDoc(linkRef);
-    } catch (error) {
-      console.error("Error deleting link:", error);
-      showToast("링크 삭제 중 오류가 발생했습니다.", "error");
-    }
-  }
+  if (authLoading) return null
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center pt-32 pb-24 px-6 bg-background selection:bg-primary/10">
-      
+
       {/* 중앙 정렬되는 래퍼 요소 */}
       <div className="relative z-10 w-full max-w-xl flex flex-col gap-16">
-        
+
         {/* 프로필 이미지 및 사용자 정보 */}
         <div className="flex flex-col items-center text-center gap-8">
           <div className="relative">
             <Avatar className="w-32 h-32 border-2 border-border shadow-soft rounded-3xl overflow-hidden transition-all duration-500 hover:rounded-2xl">
-              {user?.photoURL ? (
-                <AvatarImage src={user.photoURL} alt={user.displayName || "Avatar"} />
+              {profile?.photoURL ? (
+                <AvatarImage src={profile.photoURL} alt={profile.displayName} />
               ) : (
                 <AvatarFallback className="bg-muted font-bold text-5xl text-muted-foreground uppercase">
-                  {user?.displayName ? user.displayName[0] : "M"}
+                  {profile?.displayName ? profile.displayName[0] : "M"}
                 </AvatarFallback>
               )}
             </Avatar>
@@ -124,30 +133,117 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl">
-              {user ? `@${user.displayName?.replace(/\s+/g, '').toLowerCase()}` : "My Link"}
-            </h1>
-            
-            <p className="text-lg font-medium text-muted-foreground max-w-md mx-auto leading-relaxed">
-              {user ? `${user.displayName}님의 모든 링크를 한 곳에서.` : "가장 간결하고 아름다운 멀티 링크 서비스."}
-            </p>
+          <div className="flex flex-col gap-4 w-full max-w-md mx-auto items-center">
+            {/* Display Name */}
+            <div className="group relative w-full flex flex-col items-center">
+              <div className="group relative w-full flex flex-col items-center">
+              <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl text-center">
+                {profile ? profile.displayName : "My Link"}
+              </h1>
+            </div>
+            </div>
 
-            <div className="flex justify-center gap-3 mt-2">
-              {user ? (
-                <>
-                  <span className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-[11px] font-bold tracking-widest uppercase shadow-soft">
-                    Member
-                  </span>
-                  <span className="px-4 py-1.5 rounded-xl bg-muted text-muted-foreground text-[11px] font-bold tracking-widest uppercase">
-                    Space
-                  </span>
-                </>
+            {/* Username / Handle */}
+            <div className="group relative w-full flex flex-col items-center">
+              {editingField === "username" ? (
+                <div className="flex flex-col items-center gap-2 w-full animate-in fade-in zoom-in-95 duration-200">
+                  <div className="relative w-full max-w-[240px]">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold text-lg">@</span>
+                    <Input
+                      value={editValue}
+                      onChange={(e) => {
+                        setEditValue(e.target.value)
+                        handleUsernameCheck(e.target.value)
+                      }}
+                      className="text-lg font-bold text-center h-12 w-full pl-10 pr-10 rounded-xl border-primary shadow-soft bg-background"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveProfile()
+                        if (e.key === "Escape") handleCancelEdit()
+                      }}
+                      onBlur={() => !saveProfileMutation.isPending && handleCancelEdit()}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      {isCheckingUsername ? <Check className="w-4 h-4 text-muted-foreground animate-pulse" /> :
+                       usernameStatus === "available" ? <Check className="w-4 h-4 text-green-500" /> :
+                       usernameStatus === "taken" ? <X className="w-4 h-4 text-destructive" /> : null}
+                    </div>
+                  </div>
+                  {usernameStatus === "taken" && <span className="text-[11px] font-bold text-destructive uppercase tracking-widest">이미 선점된 닉네임입니다</span>}
+                </div>
               ) : (
-                <span className="px-4 py-1.5 rounded-xl bg-muted text-muted-foreground text-[11px] font-bold tracking-widest uppercase">
-                  New Generation
-                </span>
+                <div
+                  onClick={() => user && handleStartEdit("username", profile?.username || "")}
+                  className={cn(
+                    "relative flex items-center gap-2 cursor-pointer transition-all duration-300 rounded-xl px-4 py-1 hover:bg-primary/5 hover:scale-105",
+                    !user && "cursor-default"
+                  )}
+                >
+                  <span className="text-lg font-bold text-primary tracking-tight opacity-70">
+                    {profile ? `@${profile.username}` : ""}
+                  </span>
+                  {user && (
+                    <Edit3 className="w-4 h-4 opacity-0 group-hover:opacity-40 transition-opacity absolute -right-6" />
+                  )}
+                </div>
               )}
+            </div>
+
+            {/* Bio */}
+            <div className="group relative w-full flex flex-col items-center">
+              {editingField === "bio" ? (
+                <div className="flex items-center gap-2 w-full justify-center animate-in fade-in zoom-in-95 duration-200">
+                  <div className="relative w-full max-w-sm">
+                    <Input
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="text-base font-medium text-center h-14 w-full rounded-xl border-primary shadow-soft bg-background"
+                      placeholder="소개글을 입력하세요"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveProfile()
+                        if (e.key === "Escape") handleCancelEdit()
+                      }}
+                      onBlur={() => !saveProfileMutation.isPending && handleCancelEdit()}
+                    />
+
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() => user && handleStartEdit("bio", profile?.bio || "")}
+                  className={cn(
+                    "relative flex flex-col items-center gap-2 cursor-pointer transition-all duration-300 rounded-2xl px-6 py-2 hover:bg-muted/30 max-w-md",
+                    !user && "cursor-default"
+                  )}
+                >
+                  <p className="text-lg font-medium text-muted-foreground text-center leading-relaxed">
+                    {profile ? profile.bio : "가장 간결하고 아름다운 멀티 링크 서비스."}
+                  </p>
+                  {user && (
+                    <Edit3 className="w-4 h-4 opacity-0 group-hover:opacity-40 transition-opacity absolute -right-4 top-1/2 -translate-y-1/2" />
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col items-center gap-6 mt-6">
+              <div className="flex justify-center gap-3">
+                {user ? (
+                  <>
+                    <span className="px-4 py-1.5 rounded-xl bg-primary/10 text-primary text-[10px] font-bold tracking-widest uppercase border border-primary/20">
+                      Member
+                    </span>
+                    <span className="px-4 py-1.5 rounded-xl bg-muted text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      Space
+                    </span>
+                  </>
+                ) : (
+                  <span className="px-4 py-1.5 rounded-xl bg-muted text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                    New Generation
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -156,16 +252,15 @@ export default function ProfilePage() {
           /* 로그인 시 보여줄 링크 목록 */
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-center px-2 mb-2">
-              <AddLinkDialog onAdd={handleAddLink} />
+              <AddLinkDialog uid={user.uid} />
             </div>
-            
+
             <div className="grid grid-cols-1 gap-4">
               {links.map((link) => (
-                <LinkCard 
+                <LinkCard
                   key={link.id}
                   link={link}
-                  onUpdate={handleUpdateLink}
-                  onDelete={handleDeleteLink}
+                  uid={user.uid}
                 />
               ))}
             </div>
@@ -176,7 +271,7 @@ export default function ProfilePage() {
             <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center text-primary border border-border">
               <Lock className="w-10 h-10" />
             </div>
-            
+
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-bold text-foreground">
                 시작해볼까요?
@@ -187,7 +282,7 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <Button 
+            <Button
               onClick={loginWithGoogle}
               size="lg"
               className="w-full h-16 gap-3 font-bold text-lg bg-primary text-primary-foreground hover:scale-[1.01] active:scale-[0.99] transition-all rounded-2xl shadow-soft"
@@ -204,7 +299,7 @@ export default function ProfilePage() {
             <Share2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
             내 프로필 공유하기
           </button>
-          
+
           <div className="flex items-center gap-2 py-4 px-6 rounded-full border border-border/40 bg-muted/30">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">
               © 2026 My Link • Built with Passion
