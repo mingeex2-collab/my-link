@@ -8,6 +8,7 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -20,13 +21,19 @@ export function useAuth() {
   }, []);
 
   const loginWithGoogle = async () => {
+    if (isLoggingIn) return;
+    setIsLoggingIn(true);
     try {
       googleProvider.setCustomParameters({
         prompt: 'select_account'
       });
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      console.error("Login failed:", error);
+      if ((error as any).code !== 'auth/cancelled-popup-request') {
+        console.error("Login failed:", error);
+      }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -43,5 +50,5 @@ export function useAuth() {
     }
   };
 
-  return { user, loading: loading || isLoggingOut, loginWithGoogle, logout, isLoggingOut };
+  return { user, loading: loading || isLoggingIn || isLoggingOut, loginWithGoogle, logout, isLoggingOut, isLoggingIn };
 }

@@ -42,13 +42,12 @@ export function Header() {
       <div className="w-full max-w-7xl flex items-center justify-between">
         {/* Left: Logo */}
         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.location.href = "/"}>
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center transition-all group-hover:bg-primary/90">
-            <span className="text-primary-foreground font-bold text-xl italic tracking-tighter">M</span>
+          <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center transition-all group-hover:bg-primary/20 shadow-sm">
+            <span className="text-primary font-medium text-lg italic tracking-tighter">M</span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-base tracking-tight text-foreground uppercase">My Link</span>
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest leading-none">Developer</span>
-          </div>
+          <span className="font-semibold text-xl tracking-tighter text-foreground uppercase group-hover:text-primary transition-colors">
+            My Link
+          </span>
         </div>
 
         {/* Right: Auth / Profile */}
@@ -145,10 +144,10 @@ export function Header() {
             ) : (
               <Button 
                 onClick={loginWithGoogle}
-                className="px-6 rounded-full gap-2 bg-slate-900 dark:bg-slate-100 dark:text-slate-900 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg"
+                className="px-4 py-2 rounded-none bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg"
               >
-                <LogIn className="w-4 h-4" />
-                Google로 시작하기
+
+                로그인
               </Button>
             )}
           </div>

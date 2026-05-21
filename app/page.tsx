@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import {
   Share2,
   Sparkles,
+  Link as LinkIcon,
   ArrowRight,
   Edit3,
   Check,
@@ -114,24 +115,37 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="relative min-h-screen w-full flex flex-col items-center bg-background selection:bg-primary/10 overflow-hidden">
+      <div className="relative min-h-screen w-full flex flex-col items-center bg-gradient-to-br from-sky-50 to-amber-100 dark:from-slate-950 dark:to-slate-900 selection:bg-primary/20 overflow-x-hidden">
         {/* Background Decorative Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/40 to-transparent blur-3xl rounded-full mix-blend-screen" />
+        <div className="absolute -top-48 -left-48 w-[800px] h-[800px] opacity-60 pointer-events-none">
+          <div className="absolute inset-0 bg-white/60 dark:bg-purple-500/10 blur-[100px] rounded-full" />
+        </div>
+        <div className="absolute top-[20%] -right-24 w-[1000px] h-[1000px] opacity-60 pointer-events-none">
+          <div className="absolute inset-0 bg-white/70 dark:bg-purple-500/10 blur-[120px] rounded-full" />
+        </div>
+
+        {/* Floating Elements for Decoration */}
+        <div className="absolute top-32 right-[15%] hidden lg:flex items-center gap-3 px-6 py-4 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md border border-white/60 dark:border-slate-700/60 rounded-full shadow-lg animate-in fade-in slide-in-from-right-12 duration-1000 delay-300">
+          <div className="w-6 h-6 rounded-full bg-purple-400" />
+          <div className="w-24 h-2.5 rounded-full bg-slate-900/10 dark:bg-slate-200/10" />
+        </div>
+        <div className="absolute bottom-48 left-[15%] hidden lg:flex items-center gap-4 px-8 py-5 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md border border-white/60 dark:border-slate-700/60 rounded-full shadow-lg animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
+          <div className="w-8 h-8 rounded-full bg-fuchsia-400" />
+          <div className="w-32 h-3 rounded-full bg-slate-900/10 dark:bg-slate-200/10" />
         </div>
 
         <div className="relative z-10 w-full max-w-5xl flex flex-col items-center px-6 pt-32 pb-24 gap-32">
           
           {/* Hero Section */}
           <div className="w-full flex flex-col items-center text-center gap-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary border border-primary/20 text-sm font-bold tracking-widest uppercase mb-4 shadow-sm">
-              <Sparkles className="w-4 h-4" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary border border-primary/20 text-sm font-semibold tracking-widest uppercase mb-4 shadow-sm">
+              <LinkIcon className="w-4 h-4" />
               <span>새로운 멀티 링크의 시작</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
+            <h1 className="text-5xl md:text-7xl font-medium tracking-tight text-foreground leading-[1.1]">
               단 하나의 링크로<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
+              <span className="text-primary">
                 모든 것을 연결하세요
               </span>
             </h1>
@@ -144,7 +158,7 @@ export default function ProfilePage() {
               <Button
                 onClick={loginWithGoogle}
                 size="lg"
-                className="w-full sm:w-auto h-16 px-10 gap-3 font-bold text-lg bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all rounded-2xl shadow-soft"
+                className="w-full sm:w-auto h-16 px-10 gap-3 font-semibold text-lg bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all rounded-md shadow-soft"
               >
                 Google로 시작하기
                 <ArrowRight className="w-6 h-6" />
@@ -159,7 +173,7 @@ export default function ProfilePage() {
                 <Zap className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-3 text-foreground">초고속 생성</h3>
+                <h3 className="text-2xl font-semibold mb-3 text-foreground">초고속 생성</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   클릭 몇 번이면 준비 끝! 불필요한 설정 없이 즉시 나만의 페이지를 만들 수 있습니다.
                 </p>
@@ -171,7 +185,7 @@ export default function ProfilePage() {
                 <Layout className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-3 text-foreground">직관적인 관리</h3>
+                <h3 className="text-2xl font-semibold mb-3 text-foreground">직관적인 관리</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   드래그 앤 드롭으로 링크 순서를 변경하고 한 눈에 프로필 정보를 관리하세요.
                 </p>
@@ -183,7 +197,7 @@ export default function ProfilePage() {
                 <Smartphone className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-3 text-foreground">반응형 디자인</h3>
+                <h3 className="text-2xl font-semibold mb-3 text-foreground">반응형 디자인</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   스마트폰, 태블릿, PC 어디서든 완벽하게 보이는 아름다운 프로필을 제공합니다.
                 </p>
@@ -206,7 +220,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center pt-32 pb-24 px-6 bg-background selection:bg-primary/10">
+    <div className="relative min-h-screen w-full flex flex-col items-center pt-32 pb-24 px-6 bg-gradient-to-br from-sky-50 to-amber-100 dark:from-slate-950 dark:to-slate-900 selection:bg-primary/20 overflow-x-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute -top-48 -left-48 w-[800px] h-[800px] opacity-60 pointer-events-none">
+        <div className="absolute inset-0 bg-white/60 dark:bg-purple-500/10 blur-[100px] rounded-full" />
+      </div>
+      <div className="absolute top-[20%] -right-24 w-[1000px] h-[1000px] opacity-60 pointer-events-none">
+        <div className="absolute inset-0 bg-white/70 dark:bg-purple-500/10 blur-[120px] rounded-full" />
+      </div>
 
       {/* 중앙 정렬되는 래퍼 요소 */}
       <div className="relative z-10 w-full max-w-xl flex flex-col gap-16">
@@ -218,13 +239,13 @@ export default function ProfilePage() {
               {profile?.photoURL ? (
                 <AvatarImage src={profile.photoURL} alt={profile.displayName} />
               ) : (
-                <AvatarFallback className="bg-muted font-bold text-5xl text-muted-foreground uppercase">
+                <AvatarFallback className="bg-muted font-semibold text-5xl text-muted-foreground uppercase">
                   {profile?.displayName ? profile.displayName[0] : "M"}
                 </AvatarFallback>
               )}
             </Avatar>
             <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-background border-2 border-border rounded-2xl flex items-center justify-center shadow-soft">
-              <Sparkles className="w-5 h-5 text-primary" />
+              <LinkIcon className="w-5 h-5 text-primary" />
             </div>
           </div>
 
@@ -232,7 +253,7 @@ export default function ProfilePage() {
             {/* Display Name */}
             <div className="group relative w-full flex flex-col items-center">
               <div className="group relative w-full flex flex-col items-center">
-              <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl text-center">
+              <h1 className="text-5xl font-medium tracking-tight text-foreground sm:text-6xl text-center">
                 {profile ? profile.displayName : "My Link"}
               </h1>
             </div>
@@ -243,14 +264,14 @@ export default function ProfilePage() {
               {editingField === "username" ? (
                 <div className="flex flex-col items-center gap-2 w-full animate-in fade-in zoom-in-95 duration-200">
                   <div className="relative w-full max-w-[240px]">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold text-lg">@</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-semibold text-lg">@</span>
                     <Input
                       value={editValue}
                       onChange={(e) => {
                         setEditValue(e.target.value)
                         handleUsernameCheck(e.target.value)
                       }}
-                      className="text-lg font-bold text-center h-12 w-full pl-10 pr-10 rounded-xl border-primary shadow-soft bg-background"
+                      className="text-lg font-semibold text-center h-12 w-full pl-10 pr-10 rounded-xl border-primary shadow-soft bg-background"
                       autoFocus
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleSaveProfile()
@@ -274,7 +295,7 @@ export default function ProfilePage() {
                     !user && "cursor-default"
                   )}
                 >
-                  <span className="text-lg font-bold text-primary tracking-tight opacity-70">
+                  <span className="text-lg font-semibold text-primary tracking-tight opacity-70">
                     {profile ? `@${profile.username}` : ""}
                   </span>
                   {user && (

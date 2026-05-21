@@ -2,7 +2,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore, Firestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -29,7 +29,17 @@ if (typeof window !== "undefined") {
 }
 
 const auth = getAuth(app);
-const db = getFirestore(app);
+
+// Next.js SSR (서버 컴포넌트) 환경에서 Firestore gRPC 에러를 방지하기 위해 강제 롱폴링 설정
+let db: Firestore;
+try {
+  db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+  });
+} catch (error) {
+  db = getFirestore(app);
+}
+
 const googleProvider = new GoogleAuthProvider();
 
 export { app, analytics, auth, db, googleProvider };

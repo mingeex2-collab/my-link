@@ -13,7 +13,7 @@ export function useProfile(uid: string | null, user: User | null) {
 
   return useQuery({
     queryKey: ["profile", uid],
-    queryFn: () => fetchProfile(uid!, fallback),
+    queryFn: () => uid ? fetchProfile(uid, fallback) : Promise.resolve(fallback),
     enabled: !!uid,
     placeholderData: uid ? undefined : fallback,
   })

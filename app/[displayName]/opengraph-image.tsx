@@ -17,21 +17,31 @@ export default async function Image({ params }: { params: Promise<{ displayName:
   let bio = "나만의 멀티 프로필 링크 모음";
   let photoURL = "";
 
+  let uid = null;
   try {
-    const uid = await findUidByUsername(username);
-    if (uid) {
+    uid = await findUidByUsername(username);
+  } catch (e) {
+    console.error('Failed to find UID for OG image', e);
+  }
+  if (!uid) {
+    // fallback generic OG image data
+    displayName = username;
+    bio = 'My Link 프로필';
+    photoURL = '';
+  } else {
+    try {
       const profile = await fetchProfile(uid, {
         displayName: username,
         username: username,
-        bio: "",
-        photoURL: "",
+        bio: '',
+        photoURL: '',
       });
       if (profile.displayName) displayName = profile.displayName;
       if (profile.bio) bio = profile.bio;
       if (profile.photoURL) photoURL = profile.photoURL;
+    } catch (error) {
+      console.error('Failed to fetch profile for OG image', error);
     }
-  } catch (error) {
-    console.error("Failed to fetch profile for OG image", error);
   }
 
   return new ImageResponse(

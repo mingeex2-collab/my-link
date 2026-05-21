@@ -22,12 +22,22 @@ export async function generateMetadata({
     };
   }
 
-  const profile = await fetchProfile(uid, {
-    displayName: username,
-    username: username,
-    bio: "가장 간결하고 아름다운 멀티 링크 서비스.",
-    photoURL: "",
-  });
+  let profile;
+  try {
+    profile = await fetchProfile(uid, {
+      displayName: username,
+      username: username,
+      bio: "가장 간결하고 아름다운 멀티 링크 서비스.",
+      photoURL: "",
+    });
+  } catch (e) {
+    // Firestore 연결 오류 시 안전한 메타데이터 반환
+    console.error("fetchProfile error", e);
+    return {
+      title: `${username} - My Link (오프라인)`,
+      description: "일시적인 연결 오류로 메타데이터를 불러올 수 없습니다.",
+    };
+  }
 
   const url = `/${username}`;
   const pageTitle = `${profile.displayName} (@${profile.username})`;

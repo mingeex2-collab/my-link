@@ -15,6 +15,20 @@ import {
 import type { LinkItem } from "@/data/links"
 
 export async function findUidByUsername(username: string): Promise<string | null> {
+  // SSR 환경 (generateMetadata 등)에서는 gRPC 오류 방지를 위해 REST API 사용
+  if (typeof window === "undefined") {
+    try {
+      const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+      const res = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/usernames/${username.toLowerCase()}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.fields?.uid?.stringValue || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // 클라이언트 환경
   try {
     const docSnap = await getDoc(doc(db, "usernames", username.toLowerCase()))
     if (docSnap.exists()) {
@@ -48,6 +62,27 @@ export async function fetchProfile(
   uid: string,
   fallback: Omit<UserProfile, "updatedAt">
 ): Promise<UserProfile> {
+  // SSR 환경에서는 gRPC 오류 방지를 위해 REST API 사용
+  if (typeof window === "undefined") {
+    try {
+      const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+      const res = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}/profile/main`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.fields) {
+          return {
+            displayName: data.fields.displayName?.stringValue || fallback.displayName,
+            username: data.fields.username?.stringValue || fallback.username,
+            bio: data.fields.bio?.stringValue || fallback.bio,
+            photoURL: data.fields.photoURL?.stringValue || fallback.photoURL,
+          };
+        }
+      }
+    } catch (error) {}
+    return fallback;
+  }
+
+  // 클라이언트 환경
   const profileRef = doc(db, `users/${uid}/profile`, "main")
   const docSnap = await getDoc(profileRef)
   if (docSnap.exists()) {

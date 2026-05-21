@@ -11,7 +11,7 @@ export default async function Image() {
           display: "flex",
           width: "100%",
           height: "100%",
-          background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)",
+          background: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)",
           position: "relative",
           overflow: "hidden",
           fontFamily: "sans-serif",
@@ -50,7 +50,7 @@ export default async function Image() {
           borderRadius: 30, display: "flex", alignItems: "center", padding: "0 20px",
           boxShadow: "0 10px 20px rgba(0,0,0,0.02)"
         }}>
-          <div style={{ width: 20, height: 20, borderRadius: 10, background: "#38bdf8", marginRight: 15 }} />
+          <div style={{ width: 20, height: 20, borderRadius: 10, background: "#c084fc", marginRight: 15 }} />
           <div style={{ width: 100, height: 10, borderRadius: 5, background: "rgba(15, 23, 42, 0.1)" }} />
         </div>
 
@@ -60,7 +60,7 @@ export default async function Image() {
           borderRadius: 35, display: "flex", alignItems: "center", padding: "0 25px",
           boxShadow: "0 10px 20px rgba(0,0,0,0.02)"
         }}>
-          <div style={{ width: 24, height: 24, borderRadius: 12, background: "#0ea5e9", marginRight: 20 }} />
+          <div style={{ width: 24, height: 24, borderRadius: 12, background: "#a855f7", marginRight: 20 }} />
           <div style={{ width: 130, height: 12, borderRadius: 6, background: "rgba(15, 23, 42, 0.1)" }} />
         </div>
 
@@ -90,8 +90,8 @@ export default async function Image() {
             }}
           >
             {/* Logo/Icon */}
-            <div style={{ display: "flex", marginBottom: 32, padding: 20, background: "rgba(14, 165, 233, 0.1)", borderRadius: 32 }}>
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div style={{ display: "flex", marginBottom: 32, padding: 20, background: "rgba(192, 132, 252, 0.1)", borderRadius: 32 }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
@@ -101,7 +101,7 @@ export default async function Image() {
               style={{
                 fontSize: 90,
                 fontWeight: 900,
-                color: "#0f172a",
+                color: "#1e293b",
                 letterSpacing: "-0.04em",
                 marginBottom: 20,
                 display: "flex",
@@ -114,7 +114,7 @@ export default async function Image() {
               style={{
                 fontSize: 32,
                 fontWeight: 500,
-                color: "#475569",
+                color: "#64748b",
                 letterSpacing: "-0.01em",
                 display: "flex",
               }}

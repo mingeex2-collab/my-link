@@ -1,4 +1,4 @@
-import { Geist_Mono, Noto_Sans_KR } from "next/font/google"
+import { Geist_Mono, Inter } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -8,16 +8,16 @@ import { cn } from "@/lib/utils";
 
 import type { Metadata } from "next";
 
-const noto = Noto_Sans_KR({
-  subsets: ["latin"],
-  weight: ["100", "300", "400", "500", "700", "900"],
-  variable: "--font-noto",
-})
+// Noto_Sans_KR removed
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 const getBaseUrl = () => {
   // If the user has explicitly set NEXT_PUBLIC_SITE_URL in Vercel to localhost by mistake, ignore it
@@ -78,7 +78,7 @@ export default function RootLayout({
       lang="ko"
       suppressHydrationWarning
     >
-      <body className={cn("antialiased", fontMono.variable, "font-sans", noto.variable)}>
+      <body className={cn("antialiased", fontMono.variable, inter.variable, "font-sans")}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
