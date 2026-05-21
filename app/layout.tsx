@@ -23,11 +23,6 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  verification: {
-    other: {
-      "naver-site-verification": "72cc4fe17609d6a2970757912d038d9d2e588a57", // Updated token from user
-    },
-  },
   title: {
     default: "My Link - 나만의 멀티 링크 프로필",
     template: "%s | My Link",
