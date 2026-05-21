@@ -111,6 +111,7 @@ export default async function Image({ params }: { params: Promise<{ displayName:
               }}
             >
               {photoURL ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={photoURL}
                   alt={displayName}

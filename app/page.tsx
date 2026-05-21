@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils"
 import {
   Share2,
   Sparkles,
-  Lock,
   ArrowRight,
   Edit3,
   Check,
@@ -51,7 +50,7 @@ export default function ProfilePage() {
       const snapshot = await getDocs(q)
       if (snapshot.empty) {
         for (const item of dummyLinks) {
-          const { id, ...dataToSave } = item
+          const { id: _id, ...dataToSave } = item
           await addDoc(linksRef, { ...dataToSave, createdAt: new Date().toISOString() })
         }
       }

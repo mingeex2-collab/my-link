@@ -3,8 +3,6 @@ import { Geist_Mono, Noto_Sans_KR } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/Header"
-import { ToastProvider } from "@/lib/toast-context";
-import { CustomToaster } from "@/components/ui/custom-toaster";
 import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 

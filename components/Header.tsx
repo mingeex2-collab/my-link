@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, User, Copy, ExternalLink, Check, BarChart3 } from "lucide-react";
+import { LogIn, LogOut, Copy, ExternalLink, Check, BarChart3 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Menu,
@@ -14,7 +14,7 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
-import { cn } from "@/lib/utils";
+
 
 export function Header() {
   const { user, loading: authLoading, loginWithGoogle, logout } = useAuth();

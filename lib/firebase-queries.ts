@@ -10,9 +10,6 @@ import {
   deleteDoc,
   getDoc,
   runTransaction,
-  collectionGroup,
-  where,
-  limit,
   increment,
 } from "firebase/firestore"
 import type { LinkItem } from "@/data/links"

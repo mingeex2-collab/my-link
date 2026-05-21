@@ -8,7 +8,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart3, TrendingUp, MousePointerClick, Activity } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 
 export default function StatusPage() {
   const { user, loading } = useAuth();
