@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, User, Copy, ExternalLink, Check } from "lucide-react";
+import { LogIn, LogOut, User, Copy, ExternalLink, Check, BarChart3 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Menu,
@@ -33,7 +33,7 @@ export function Header() {
   };
 
   const pathname = usePathname();
-  const isHomePage = pathname === '/';
+  const showRightMenu = pathname === '/' || pathname === '/status';
 
   if (authLoading) return null;
 
@@ -52,7 +52,7 @@ export function Header() {
         </div>
 
         {/* Right: Auth / Profile */}
-        {isHomePage && (
+        {showRightMenu && (
           <div className="flex items-center gap-4">
             {user ? (
               <>
@@ -109,20 +109,21 @@ export function Header() {
                     <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center text-foreground border border-border/40 group-hover:bg-muted transition-colors">
                       <ExternalLink className="w-4 h-4" />
                     </div>
-                    <div className="flex flex-col">
-                      <span className="font-bold text-xs">내 페이지 미리보기</span>
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">내 공개용 페이지 확인하기</span>
-                    </div>
+                    <span className="font-bold text-xs">내 페이지 미리보기</span>
                   </MenuItem>
 
                   <MenuItem className="gap-3" onClick={handleCopyLink}>
                     <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center text-foreground border border-border/40 group-hover:bg-muted transition-colors">
                       {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </div>
-                    <div className="flex flex-col">
-                      <span className="font-bold text-xs">{copied ? "복사되었습니다!" : "내 링크 복사"}</span>
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">URL 클립보드 복사</span>
+                    <span className="font-bold text-xs">{copied ? "복사되었습니다!" : "내 링크 복사"}</span>
+                  </MenuItem>
+
+                  <MenuItem className="gap-3" onClick={() => window.location.href = '/status'}>
+                    <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center text-foreground border border-border/40 group-hover:bg-muted transition-colors">
+                      <BarChart3 className="w-4 h-4" />
                     </div>
+                    <span className="font-bold text-xs">통계 확인하기</span>
                   </MenuItem>
 
                   <MenuSeparator />

@@ -207,7 +207,7 @@ export function LinkCard({ link, uid, readOnly = false }: LinkCardProps) {
             onClick={async (e) => {
                 e.preventDefault();
                 try {
-                  if (uid) {
+                  if (uid && readOnly) {
                     await incrementClickCount(uid, link.id);
                     // Manually update cache for immediate UI refresh
                     queryClient.setQueryData(["links", uid], (old:any) => {
