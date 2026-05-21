@@ -65,7 +65,7 @@ export default async function Image({ params }: { params: Promise<{ displayName:
             left: -150,
             width: 700,
             height: 700,
-            background: "linear-gradient(to bottom right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
             borderRadius: "50%",
           }}
         />
@@ -76,7 +76,7 @@ export default async function Image({ params }: { params: Promise<{ displayName:
             right: -200,
             width: 800,
             height: 800,
-            background: "linear-gradient(to top left, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
+            background: "linear-gradient(-45deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
             borderRadius: "50%",
           }}
         />

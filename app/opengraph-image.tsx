@@ -25,7 +25,7 @@ export default async function Image() {
             left: -200,
             width: 800,
             height: 800,
-            background: "linear-gradient(to bottom right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
             borderRadius: "50%",
             transform: "rotate(45deg)",
           }}
@@ -37,7 +37,7 @@ export default async function Image() {
             right: -100,
             width: 1000,
             height: 1000,
-            background: "linear-gradient(to top left, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0))",
+            background: "linear-gradient(-45deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0))",
             borderRadius: "50%",
             transform: "rotate(-45deg)",
           }}
