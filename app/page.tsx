@@ -151,7 +151,8 @@ export default function ProfilePage() {
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed mt-2">
-              가장 간결하고 아름다운 멀티 링크 서비스. 복잡한 과정 없이 단 몇 초만에 당신만의 멋진 프로필을 완성하고 공유해보세요.
+              가장 간결하고 아름다운 멀티 링크 서비스.<br />
+              복잡한 과정 없이 단 몇 초만에 당신만의 멋진 프로필을 완성하고 공유해보세요.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 w-full sm:w-auto">
