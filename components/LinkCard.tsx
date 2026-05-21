@@ -210,9 +210,9 @@ export function LinkCard({ link, uid, readOnly = false }: LinkCardProps) {
                   if (uid && readOnly) {
                     await incrementClickCount(uid, link.id);
                     // Manually update cache for immediate UI refresh
-                    queryClient.setQueryData(["links", uid], (old:any) => {
+                    queryClient.setQueryData(["links", uid], (old: LinkItem[] | undefined) => {
                       if (!old) return old;
-                      return old.map((item:any) =>
+                      return old.map((item: LinkItem) =>
                         item.id === link.id
                           ? { ...item, clickCount: (item.clickCount ?? 0) + 1 }
                           : item
@@ -272,7 +272,7 @@ export function LinkCard({ link, uid, readOnly = false }: LinkCardProps) {
           <DialogHeader>
             <DialogTitle>정말 삭제 하시겠습니까?</DialogTitle>
             <DialogDescription className="mt-2 text-slate-500 dark:text-slate-400">
-              <span className="font-bold text-slate-800 dark:text-slate-200">"{link.title}"</span> 링크를 삭제합니다.
+              <span className="font-bold text-slate-800 dark:text-slate-200">&quot;{link.title}&quot;</span> 링크를 삭제합니다.
               <br />
               <span className="text-red-500 mt-2 block font-medium">이 작업은 되돌릴 수 없습니다.</span>
             </DialogDescription>
