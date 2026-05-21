@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   verification: {
     other: {
-      "naver-site-verification": "naverefcd92d28036b3d346464c3ecd47e576", // Added fallback meta tag
+      "naver-site-verification": "72cc4fe17609d6a2970757912d038d9d2e588a57", // Updated token from user
     },
   },
   title: {
