@@ -14,6 +14,9 @@ import {
   Edit3,
   Check,
   X,
+  Zap,
+  Layout,
+  Smartphone,
 } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -109,6 +112,99 @@ export default function ProfilePage() {
   }
 
   if (authLoading) return null
+
+  if (!user) {
+    return (
+      <div className="relative min-h-screen w-full flex flex-col items-center bg-background selection:bg-primary/10 overflow-hidden">
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/40 to-transparent blur-3xl rounded-full mix-blend-screen" />
+        </div>
+
+        <div className="relative z-10 w-full max-w-5xl flex flex-col items-center px-6 pt-32 pb-24 gap-32">
+          
+          {/* Hero Section */}
+          <div className="w-full flex flex-col items-center text-center gap-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary border border-primary/20 text-sm font-bold tracking-widest uppercase mb-4 shadow-sm">
+              <Sparkles className="w-4 h-4" />
+              <span>새로운 멀티 링크의 시작</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
+              단 하나의 링크로<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
+                모든 것을 연결하세요
+              </span>
+            </h1>
+            
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed mt-2">
+              가장 간결하고 아름다운 멀티 링크 서비스. 복잡한 과정 없이 단 몇 초만에 당신만의 멋진 프로필을 완성하고 공유해보세요.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 w-full sm:w-auto">
+              <Button
+                onClick={loginWithGoogle}
+                size="lg"
+                className="w-full sm:w-auto h-16 px-10 gap-3 font-bold text-lg bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all rounded-2xl shadow-soft"
+              >
+                Google로 시작하기
+                <ArrowRight className="w-6 h-6" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Features Section */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex flex-col gap-6 p-10 bg-card rounded-[2.5rem] border border-border shadow-soft hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
+              <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 group-hover:scale-110 transition-transform duration-300">
+                <Zap className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-3 text-foreground">초고속 생성</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  클릭 몇 번이면 준비 끝! 불필요한 설정 없이 즉시 나만의 페이지를 만들 수 있습니다.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-6 p-10 bg-card rounded-[2.5rem] border border-border shadow-soft hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
+              <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 group-hover:scale-110 transition-transform duration-300">
+                <Layout className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-3 text-foreground">직관적인 관리</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  드래그 앤 드롭으로 링크 순서를 변경하고 한 눈에 프로필 정보를 관리하세요.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-6 p-10 bg-card rounded-[2.5rem] border border-border shadow-soft hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
+              <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 group-hover:scale-110 transition-transform duration-300">
+                <Smartphone className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-3 text-foreground">반응형 디자인</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  스마트폰, 태블릿, PC 어디서든 완벽하게 보이는 아름다운 프로필을 제공합니다.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Area for Landing */}
+          <div className="flex flex-col items-center gap-6 mt-10">
+            <div className="flex items-center gap-2 py-4 px-6 rounded-full border border-border/40 bg-muted/30">
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-muted-foreground/60">
+                © 2026 My Link • Built with Passion
+              </p>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center pt-32 pb-24 px-6 bg-background selection:bg-primary/10">
@@ -248,50 +344,22 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {user ? (
-          /* 로그인 시 보여줄 링크 목록 */
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-center px-2 mb-2">
-              <AddLinkDialog uid={user.uid} />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              {links.map((link) => (
-                <LinkCard
-                  key={link.id}
-                  link={link}
-                  uid={user.uid}
-                />
-              ))}
-            </div>
+        {/* 로그인 시 보여줄 링크 목록 */}
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-center px-2 mb-2">
+            <AddLinkDialog uid={user.uid} />
           </div>
-        ) : (
-          /* 로그아웃 시 보여줄 안내 문구 */
-          <div className="flex flex-col items-center gap-10 py-16 px-10 bg-card rounded-[2.5rem] border border-border shadow-soft animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center text-primary border border-border">
-              <Lock className="w-10 h-10" />
-            </div>
 
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-bold text-foreground">
-                시작해볼까요?
-              </h2>
-              <p className="text-base text-muted-foreground leading-relaxed">
-                나만의 고유한 링크 페이지를 만들고 공유하세요.<br />
-                몇 번의 클릭만으로 충분합니다.
-              </p>
-            </div>
-
-            <Button
-              onClick={loginWithGoogle}
-              size="lg"
-              className="w-full h-16 gap-3 font-bold text-lg bg-primary text-primary-foreground hover:scale-[1.01] active:scale-[0.99] transition-all rounded-2xl shadow-soft"
-            >
-              Google로 시작하기
-              <ArrowRight className="w-6 h-6" />
-            </Button>
+          <div className="grid grid-cols-1 gap-4">
+            {links.map((link) => (
+              <LinkCard
+                key={link.id}
+                link={link}
+                uid={user.uid}
+              />
+            ))}
           </div>
-        )}
+        </div>
 
         {/* 푸터 영역 */}
         <div className="flex flex-col items-center gap-10 mt-12 pb-12">
