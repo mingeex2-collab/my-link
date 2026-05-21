@@ -51,7 +51,7 @@ export default async function Image({ params }: { params: Promise<{ displayName:
           display: "flex",
           width: "100%",
           height: "100%",
-          background: "linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 100%)",
+          background: "linear-gradient(135deg, #f0f9ff 0%, #fef3c7 100%)",
           position: "relative",
           overflow: "hidden",
           fontFamily: "sans-serif",
@@ -76,7 +76,7 @@ export default async function Image({ params }: { params: Promise<{ displayName:
             right: -200,
             width: 800,
             height: 800,
-            background: "linear-gradient(to top left, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0))",
+            background: "linear-gradient(to top left, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
             borderRadius: "50%",
           }}
         />
@@ -100,7 +100,7 @@ export default async function Image({ params }: { params: Promise<{ displayName:
               alignItems: "center",
               justifyContent: "center",
               padding: "60px 80px",
-              background: "rgba(255, 255, 255, 0.7)",
+              background: "rgba(255, 255, 255, 0.85)",
               border: "1px solid rgba(255, 255, 255, 1)",
               borderRadius: "48px",
               boxShadow: "0 30px 60px rgba(0,0,0,0.05)",
@@ -114,10 +114,10 @@ export default async function Image({ params }: { params: Promise<{ displayName:
                 alignItems: "center",
                 justifyContent: "center",
                 padding: 8,
-                background: "linear-gradient(135deg, #bae6fd 0%, #38bdf8 100%)",
+                background: "linear-gradient(135deg, #bae6fd 0%, #fcd34d 100%)",
                 borderRadius: "100%",
                 marginBottom: 32,
-                boxShadow: "0 0 40px rgba(56, 189, 248, 0.2)",
+                boxShadow: "0 0 40px rgba(252, 211, 77, 0.2)",
               }}
             >
               {photoURL ? (
@@ -146,7 +146,7 @@ export default async function Image({ params }: { params: Promise<{ displayName:
                     justifyContent: "center",
                     fontSize: 72,
                     fontWeight: 900,
-                    color: "#0ea5e9",
+                    color: "#6b21a8",
                   }}
                 >
                   {displayName.charAt(0).toUpperCase()}
@@ -171,13 +171,13 @@ export default async function Image({ params }: { params: Promise<{ displayName:
               style={{
                 fontSize: 32,
                 fontWeight: 600,
-                color: "#0284c7",
+                color: "#6b21a8",
                 marginBottom: 24,
                 display: "flex",
                 padding: "8px 24px",
-                background: "rgba(2, 132, 199, 0.1)",
+                background: "rgba(107, 33, 168, 0.1)",
                 borderRadius: "32px",
-                border: "1px solid rgba(2, 132, 199, 0.2)",
+                border: "1px solid rgba(107, 33, 168, 0.2)",
               }}
             >
               @{username}
