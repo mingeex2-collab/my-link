@@ -8,6 +8,8 @@ import { CustomToaster } from "@/components/ui/custom-toaster";
 import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 
+import type { Metadata } from "next";
+
 const noto = Noto_Sans_KR({
   subsets: ["latin"],
   weight: ["100", "300", "400", "500", "700", "900"],
@@ -18,6 +20,45 @@ const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
+
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title: {
+    default: "My Link - 나만의 멀티 링크 프로필",
+    template: "%s | My Link",
+  },
+  description: "단 하나의 링크로 모든 것을 연결하세요. 개발자와 크리에이터를 위한 가장 간결하고 아름다운 싱글페이지 멀티 링크 서비스입니다.",
+  openGraph: {
+    title: {
+      default: "My Link - 나만의 멀티 링크 프로필",
+      template: "%s | My Link",
+    },
+    description: "단 하나의 링크로 모든 것을 연결하세요. 가장 간결하고 아름다운 싱글페이지 멀티 링크 서비스입니다.",
+    url: "/",
+    siteName: "My Link",
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: {
+      default: "My Link - 나만의 멀티 링크 프로필",
+      template: "%s | My Link",
+    },
+    description: "단 하나의 링크로 모든 것을 연결하세요. 가장 간결하고 아름다운 싱글페이지 멀티 링크 서비스입니다.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
 
 export default function RootLayout({
   children,
