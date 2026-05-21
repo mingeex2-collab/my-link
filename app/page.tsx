@@ -8,7 +8,6 @@ import { LinkCard } from "@/components/LinkCard"
 import { cn } from "@/lib/utils"
 import {
   Share2,
-  Sparkles,
   Link as LinkIcon,
   ArrowRight,
   Edit3,
@@ -51,6 +50,7 @@ export default function ProfilePage() {
       const snapshot = await getDocs(q)
       if (snapshot.empty) {
         for (const item of dummyLinks) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { id: _id, ...dataToSave } = item
           await addDoc(linksRef, { ...dataToSave, createdAt: new Date().toISOString() })
         }

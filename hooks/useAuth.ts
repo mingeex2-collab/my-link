@@ -29,7 +29,7 @@ export function useAuth() {
       });
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      if ((error as any).code !== 'auth/cancelled-popup-request') {
+      if ((error as { code?: string })?.code !== 'auth/cancelled-popup-request') {
         console.error("Login failed:", error);
       }
     } finally {

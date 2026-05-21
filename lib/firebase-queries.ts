@@ -23,7 +23,7 @@ export async function findUidByUsername(username: string): Promise<string | null
       if (!res.ok) return null;
       const data = await res.json();
       return data.fields?.uid?.stringValue || null;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -78,7 +78,7 @@ export async function fetchProfile(
           };
         }
       }
-    } catch (error) {}
+    } catch {}
     return fallback;
   }
 
