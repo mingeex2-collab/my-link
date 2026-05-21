@@ -72,9 +72,10 @@ service cloud.firestore {
 
         // 수정: 로그인 + 본인 + 유효한 링크 데이터
         //        createdAt은 변경 불가 (원본값 유지 강제)
-        allow update: if isOwner(userId)
-          && isValidLink()
-          && request.resource.data.createdAt == resource.data.createdAt;
+        //        또한, 클릭 카운트는 누구나 수정 가능 (increment만 허용)
+        // 클릭 카운트만 업데이트 허용 (소유자든 비소유자든)
+        allow update: if (isOwner(userId) && isValidLink() && request.resource.data.createdAt == resource.data.createdAt);
+        allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clickCount']);
 
         // 삭제: 로그인 + 본인
         allow delete: if isOwner(userId);
@@ -119,9 +120,9 @@ service cloud.firestore {
       // 수정: 허용하지 않음 (트랜잭션으로 delete → create 패턴 사용)
       allow update: if false;
 
-      // 삭제: 로그인 + 해당 username에 저장된 uid가 본인인지 확인
+      // 삭제: 로그인 + 해당 username에 저장된 uid가 본인인지 확인 (문서 부재 시도 허용)
       allow delete: if isSignedIn()
-        && resource.data.uid == request.auth.uid;
+        && (resource == null || resource.data.uid == request.auth.uid);
     }
 
   }

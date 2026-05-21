@@ -7,7 +7,9 @@ import * as z from "zod"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+
 import { Edit2, Trash2 } from "lucide-react"
+import { useUpdateLink, useDeleteLink } from "@/hooks/useLinks";
 import type { LinkItem } from "@/data/links"
 import {
   Dialog,
@@ -32,7 +34,9 @@ import {
   FaTiktok,
   FaTwitch
 } from "react-icons/fa"
-import { useUpdateLink, useDeleteLink } from "@/hooks/useLinks"
+import { incrementClickCount } from "@/lib/firebase-queries";
+import { FaEye } from "react-icons/fa"
+import { useQueryClient } from "@tanstack/react-query";
 
 const linkSchema = z.object({
   title: z
@@ -85,11 +89,13 @@ interface LinkCardProps {
   link: LinkItem;
   uid: string;
   readOnly?: boolean;
+  showClickCount?: boolean;
 }
 
 export function LinkCard({ link, uid, readOnly = false }: LinkCardProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const updateLink = useUpdateLink(uid)
   const deleteLink = useDeleteLink(uid)
@@ -194,19 +200,45 @@ export function LinkCard({ link, uid, readOnly = false }: LinkCardProps) {
         <Card className="relative overflow-hidden bg-card border border-border/60 transition-all duration-300 hover:border-primary/30 hover:shadow-soft rounded-2xl">
           <div className="p-5 flex items-center justify-between w-full">
             <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-5 flex-1 w-full"
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-5 flex-1 w-full"
+            onClick={async (e) => {
+                e.preventDefault();
+                try {
+                  if (uid) {
+                    await incrementClickCount(uid, link.id);
+                    // Manually update cache for immediate UI refresh
+                    queryClient.setQueryData(["links", uid], (old:any) => {
+                      if (!old) return old;
+                      return old.map((item:any) =>
+                        item.id === link.id
+                          ? { ...item, clickCount: (item.clickCount ?? 0) + 1 }
+                          : item
+                      );
+                    });
+                  }
+                } catch (err) {
+                  console.error('Click count increment failed:', err);
+                } finally {
+                  window.open(link.url, "_blank");
+                }
+              }}
             >
               <div className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center bg-muted text-foreground border border-border/40 group-hover:scale-105 transition-transform duration-500">
                 {getIcon(link.title, link.url)}
               </div>
-
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-xl tracking-tight text-foreground truncate transition-colors duration-300 group-hover:text-primary">
                   {link.title}
                 </span>
+                {!readOnly && (
+                  <div className="flex items-center text-sm text-muted-foreground mt-1">
+                    <FaEye className="w-4 h-4 mr-1" />
+                    {link.clickCount ?? 0}
+                  </div>
+                )}
               </div>
             </a>
 
@@ -214,12 +246,12 @@ export function LinkCard({ link, uid, readOnly = false }: LinkCardProps) {
               {!readOnly && (
                 <>
                   <button
-                    onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-300"
-                    title="수정"
-                  >
-                    <Edit2 className="w-4.5 h-4.5" />
-                  </button>
+                      onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-300"
+                      title="수정"
+                    >
+                      <Edit2 className="w-4.5 h-4.5" />
+                    </button>
                   <button
                     onClick={(e) => { e.preventDefault(); setIsDeleteDialogOpen(true); }}
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-300"

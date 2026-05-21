@@ -5,6 +5,7 @@ import { useParams, notFound } from "next/navigation"
 import { findUidByUsername } from "@/lib/firebase-queries"
 import { useProfile } from "@/hooks/useProfile"
 import { useLinks } from "@/hooks/useLinks"
+
 import { LinkCard } from "@/components/LinkCard"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Sparkles, Share2, Check } from "lucide-react"
@@ -44,16 +45,17 @@ export default function DynamicProfilePage() {
   const { data: profile } = useProfile(uid, null)
   const { data: links = [] } = useLinks(uid)
 
+
   if (isError) {
     notFound()
   }
 
-  if (loading || (!profile && uid)) {
+  if (loading || !uid) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent flex-shrink-0 animate-spin rounded-full"></div>
       </div>
-    )
+    );
   }
 
   // The rest of the UI (read-only version of the ProfilePage)
@@ -99,7 +101,7 @@ export default function DynamicProfilePage() {
                 link={link}
                 uid={uid!}
                 readOnly
-              />
+/>
             ))}
             {links.length === 0 && (
               <div className="text-center py-10 text-muted-foreground">

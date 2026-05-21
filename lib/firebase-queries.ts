@@ -13,6 +13,7 @@ import {
   collectionGroup,
   where,
   limit,
+  increment,
 } from "firebase/firestore"
 import type { LinkItem } from "@/data/links"
 
@@ -58,9 +59,14 @@ export async function fetchProfile(
   return fallback
 }
 
-// ──────────────────────────────────────────────
-// Link Mutations
-// ──────────────────────────────────────────────
+export async function incrementClickCount(uid: string, id: string): Promise<void> {
+  const linkRef = doc(db, `users/${uid}/links`, id);
+  await runTransaction(db, async (transaction) => {
+    // Use Firestore's atomic increment; works even if clickCount is missing
+    transaction.update(linkRef, { clickCount: increment(1) });
+  });
+  console.log('Click count incremented for', id);
+}
 
 export async function addLink(
   uid: string,
@@ -69,6 +75,7 @@ export async function addLink(
   await addDoc(collection(db, `users/${uid}/links`), {
     ...data,
     createdAt: new Date().toISOString(),
+    clickCount: data.clickCount ?? 0,
   })
 }
 
@@ -118,7 +125,13 @@ export async function saveProfile(params: SaveProfileParams): Promise<void> {
     ) {
       const oldUsernameRef = doc(db, "usernames", currentProfile.username.toLowerCase())
       const newUsernameRef = doc(db, "usernames", value.toLowerCase())
-      if (currentProfile.username) transaction.delete(oldUsernameRef)
+      
+      if (currentProfile.username) {
+        const oldSnap = await transaction.get(oldUsernameRef)
+        if (oldSnap.exists() && oldSnap.data()?.uid === uid) {
+          transaction.delete(oldUsernameRef)
+        }
+      }
       transaction.set(newUsernameRef, { uid })
     }
   })
