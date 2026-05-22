@@ -385,26 +385,6 @@ export default function ProfilePage() {
 
         {/* 푸터 영역 */}
         <div className="flex flex-col items-center gap-10 mt-12 pb-12">
-          <button
-            onClick={() => {
-              if (profile?.username) {
-                navigator.clipboard.writeText(`${window.location.origin}/@${profile.username}`);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-              } else {
-                alert("사용자 이름(username)을 먼저 설정해주세요.");
-              }
-            }}
-            className="group flex items-center gap-3 px-10 py-5 rounded-2xl bg-foreground text-background font-bold text-base shadow-soft hover:-translate-y-1 transition-all cursor-pointer"
-          >
-            {copied ? (
-              <Check className="w-5 h-5 text-green-400 font-bold" />
-            ) : (
-              <Share2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            )}
-            {copied ? "링크가 복사되었습니다" : "내 프로필 공유하기"}
-          </button>
-
           <div className="flex items-center gap-2 py-4 px-6 rounded-full border border-border/40 bg-muted/30">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">
               © 2026 My Link • Built with Passion
