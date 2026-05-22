@@ -1,10 +1,10 @@
 import { ImageResponse } from "next/og";
 import { findUidByUsername, fetchProfile } from "@/lib/firebase-queries";
 
+export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// In Next.js 15+, params is a Promise
 export default async function Image({ params }: { params: Promise<{ displayName: string }> }) {
   const resolvedParams = await params;
   const displayNameParam = Array.isArray(resolvedParams.displayName)
@@ -23,11 +23,10 @@ export default async function Image({ params }: { params: Promise<{ displayName:
   } catch (e) {
     console.error('Failed to find UID for OG image', e);
   }
+  
   if (!uid) {
-    // fallback generic OG image data
     displayName = username;
     bio = 'My Link 프로필';
-    photoURL = '';
   } else {
     try {
       const profile = await fetchProfile(uid, {
@@ -44,6 +43,19 @@ export default async function Image({ params }: { params: Promise<{ displayName:
     }
   }
 
+  // Load Pretendard font for Korean support
+  let fontData = null;
+  try {
+    const fontRes = await fetch(
+      'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/packages/pretendard/dist/public/static/Pretendard-Bold.ttf'
+    );
+    if (fontRes.ok) {
+      fontData = await fontRes.arrayBuffer();
+    }
+  } catch (e) {
+    console.error("Failed to load font", e);
+  }
+
   return new ImageResponse(
     (
       <div
@@ -51,157 +63,130 @@ export default async function Image({ params }: { params: Promise<{ displayName:
           display: "flex",
           width: "100%",
           height: "100%",
-          background: "linear-gradient(135deg, #f0f9ff 0%, #fef3c7 100%)",
+          backgroundColor: "#f0f9ff",
           position: "relative",
-          overflow: "hidden",
-          fontFamily: "sans-serif",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 60,
+          fontFamily: fontData ? '"Pretendard"' : 'sans-serif',
         }}
       >
-        {/* Dynamic Abstract Background Elements */}
-        <div
-          style={{
-            position: "absolute",
-            top: -150,
-            left: -150,
-            width: 700,
-            height: 700,
-            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
-            borderRadius: "50%",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: -200,
-            right: -200,
-            width: 800,
-            height: 800,
-            background: "linear-gradient(-45deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
-            borderRadius: "50%",
-          }}
-        />
-
-        {/* Central Card */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            width: "100%",
-            height: "100%",
             alignItems: "center",
             justifyContent: "center",
-            padding: 60,
+            padding: "60px 80px",
+            backgroundColor: "#ffffff",
+            borderRadius: "48px",
+            width: "850px",
+            border: "2px solid #e2e8f0",
           }}
         >
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: "60px 80px",
-              background: "rgba(255, 255, 255, 0.85)",
-              border: "1px solid rgba(255, 255, 255, 1)",
-              borderRadius: "48px",
-              boxShadow: "0 30px 60px rgba(0,0,0,0.05)",
-              width: "850px",
+              padding: 8,
+              backgroundColor: "#bae6fd",
+              borderRadius: "100%",
+              marginBottom: 32,
             }}
           >
-            {/* Avatar Container with glowing border effect */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 8,
-                background: "linear-gradient(135deg, #bae6fd 0%, #fcd34d 100%)",
-                borderRadius: "100%",
-                marginBottom: 32,
-                boxShadow: "0 0 40px rgba(252, 211, 77, 0.2)",
-              }}
-            >
-              {photoURL ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={photoURL}
-                  alt={displayName}
-                  width={180}
-                  height={180}
-                  style={{
-                    borderRadius: "100%",
-                    objectFit: "cover",
-                    border: "6px solid #ffffff",
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: 180,
-                    height: 180,
-                    borderRadius: "100%",
-                    background: "#f8fafc",
-                    border: "6px solid #ffffff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 72,
-                    fontWeight: 900,
-                    color: "#6b21a8",
-                  }}
-                >
-                  {displayName.charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
-
-            <div
-              style={{
-                fontSize: 64,
-                fontWeight: 900,
-                color: "#0f172a",
-                letterSpacing: "-0.03em",
-                marginBottom: 16,
-                display: "flex",
-              }}
-            >
-              {displayName}
-            </div>
-
-            <div
-              style={{
-                fontSize: 32,
-                fontWeight: 600,
-                color: "#6b21a8",
-                marginBottom: 24,
-                display: "flex",
-                padding: "8px 24px",
-                background: "rgba(107, 33, 168, 0.1)",
-                borderRadius: "32px",
-                border: "1px solid rgba(107, 33, 168, 0.2)",
-              }}
-            >
-              @{username}
-            </div>
-
-            {bio && (
+            {photoURL ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={photoURL}
+                alt={displayName}
+                width={180}
+                height={180}
+                style={{
+                  borderRadius: "100%",
+                  objectFit: "cover",
+                  border: "6px solid #ffffff",
+                }}
+              />
+            ) : (
               <div
                 style={{
-                  fontSize: 28,
-                  fontWeight: 400,
-                  color: "#475569",
-                  textAlign: "center",
-                  maxWidth: "680px",
-                  lineHeight: 1.5,
+                  width: 180,
+                  height: 180,
+                  borderRadius: "100%",
+                  backgroundColor: "#f8fafc",
+                  border: "6px solid #ffffff",
                   display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 72,
+                  fontWeight: 900,
+                  color: "#6b21a8",
                 }}
               >
-                {bio.length > 80 ? bio.slice(0, 80) + "..." : bio}
+                {displayName.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
+
+          <div
+            style={{
+              fontSize: 64,
+              fontWeight: 900,
+              color: "#0f172a",
+              letterSpacing: "-0.03em",
+              marginBottom: 16,
+              display: "flex",
+            }}
+          >
+            {displayName}
+          </div>
+
+          <div
+            style={{
+              fontSize: 32,
+              fontWeight: 600,
+              color: "#6b21a8",
+              marginBottom: 24,
+              display: "flex",
+              padding: "8px 24px",
+              backgroundColor: "#f3e8ff",
+              borderRadius: "32px",
+            }}
+          >
+            @{username}
+          </div>
+
+          {bio && (
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 400,
+                color: "#475569",
+                textAlign: "center",
+                maxWidth: "680px",
+                lineHeight: 1.5,
+                display: "flex",
+              }}
+            >
+              {bio.length > 80 ? bio.slice(0, 80) + "..." : bio}
+            </div>
+          )}
         </div>
       </div>
     ),
-    { ...size }
+    { 
+      ...size,
+      ...(fontData && {
+        fonts: [
+          {
+            name: 'Pretendard',
+            data: fontData,
+            style: 'normal',
+            weight: 700,
+          }
+        ]
+      })
+    }
   );
 }
