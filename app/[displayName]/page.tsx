@@ -8,7 +8,7 @@ import { useLinks } from "@/hooks/useLinks"
 
 import { LinkCard } from "@/components/LinkCard"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Sparkles, Share2, Check } from "lucide-react"
+import { Sparkles } from "lucide-react"
 
 export default function DynamicProfilePage() {
   const params = useParams()
@@ -17,7 +17,6 @@ export default function DynamicProfilePage() {
 
   const [uid, setUid] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [copied, setCopied] = useState(false)
   const [isError, setIsError] = useState(false)
 
   useEffect(() => {
@@ -60,7 +59,15 @@ export default function DynamicProfilePage() {
 
   // The rest of the UI (read-only version of the ProfilePage)
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center pt-32 pb-24 px-6 bg-background selection:bg-primary/10">
+    <div className="relative min-h-screen w-full flex flex-col items-center pt-32 pb-24 px-6 bg-gradient-to-br from-sky-50 to-amber-100 dark:from-slate-950 dark:to-slate-900 selection:bg-primary/20 overflow-x-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute -top-48 -left-48 w-[800px] h-[800px] opacity-60 pointer-events-none">
+        <div className="absolute inset-0 bg-white/60 dark:bg-purple-500/10 blur-[100px] rounded-full" />
+      </div>
+      <div className="absolute top-[20%] -right-24 w-[1000px] h-[1000px] opacity-60 pointer-events-none">
+        <div className="absolute inset-0 bg-white/70 dark:bg-purple-500/10 blur-[120px] rounded-full" />
+      </div>
+
       <div className="relative z-10 w-full max-w-xl flex flex-col gap-16">
         {/* Profile Info */}
         <div className="flex flex-col items-center text-center gap-8">
@@ -113,21 +120,11 @@ export default function DynamicProfilePage() {
 
         {/* Footer */}
         <div className="flex flex-col items-center gap-10 mt-12 pb-12">
-          <button 
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            }}
-            className="group flex items-center gap-3 px-10 py-5 rounded-2xl bg-foreground text-background font-bold text-base shadow-soft hover:-translate-y-1 transition-all cursor-pointer"
-          >
-            {copied ? (
-              <Check className="w-5 h-5 text-green-400 font-bold" />
-            ) : (
-              <Share2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            )}
-            {copied ? "클립보드에 복사되었습니다" : "프로필 복사하기"}
-          </button>
+          <div className="flex items-center gap-2 py-4 px-6 rounded-full border border-border/40 bg-muted/30">
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">
+              © 2026 My Link • Built with Passion
+            </p>
+          </div>
         </div>
       </div>
     </div>
